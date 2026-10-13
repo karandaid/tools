@@ -36,19 +36,28 @@ report() {
 
   echo
   echo "--- TOP 5 PROGRAMS BY MEMORY ---"
-  ps -axo rss=,comm= | awk '{rss=$1; $1=""; sub(/^ +/,"",$0); n=split($0,p,"/"); m[p[n]]+=rss} END{for(k in m) printf "%-28s %8.0f MB\n", k, m[k]/1024}' | sort -rn -k2 | head -5
+  ps -axo rss=,comm= | awk '{rss=$1; $1=""; sub(/^ +/,"",$0); n=split($0,p,"/"); m[p[n]]+=rss} END{for(k in m) printf "%d\t%s\n", m[k]/1024, k}' \
+    | sort -rn | head -5 | awk -F'\t' '{printf "%-28s %8d MB\n", $2, $1}'
 
   echo
   echo "--- WI-FI ---"
   wifi=""
   if [ "$OS" = "Darwin" ]; then
     a=/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport
-    if [ -x "$a" ]; then
+    if [ -x "$a" ] && "$a" -I >/dev/null 2>&1; then
       i=$("$a" -I 2>/dev/null)
       ssid=$(echo "$i" | awk -F': ' '/ SSID/ {print $2}')
       [ -n "$ssid" ] && wifi="SSID : $ssid
 Signal : $(echo "$i" | awk '/agrCtlRSSI/ {s=2*($2+100); if(s>100)s=100; if(s<0)s=0; print s"%"}')
 Rate (Mbps) : $(echo "$i" | awk '/lastTxRate/ {print $2}')"
+    else
+      # macOS 14.4+: SSID may show as <redacted> without Location permission
+      wifi=$(system_profiler SPAirPortDataType 2>/dev/null | awk '
+        /Current Network Information:/ {getline; gsub(/^ +|:$/,""); ssid=$0; cur=1; next}
+        cur && /Signal \/ Noise:/ {split($0,a,": "); split(a[2],b," "); s=2*(b[1]+100); if(s>100)s=100; if(s<0)s=0; sig=s"%"}
+        cur && /Transmit Rate:/ {split($0,a,": "); rate=a[2]}
+        cur && /Other Local Wi-Fi Networks:/ {cur=0}
+        END{ if (ssid!="") printf "SSID : %s\nSignal : %s\nRate (Mbps) : %s\n", ssid, sig, rate }')
     fi
   elif have nmcli; then
     wifi=$(nmcli -t -f ACTIVE,SSID,RATE,SIGNAL dev wifi 2>/dev/null | awk -F: '$1=="yes" {split($3,r," "); print "SSID : "$2"\nSignal : "$4"%\nRate (Mbps) : "r[1]; exit}')
@@ -58,7 +67,8 @@ Rate (Mbps) : $(echo "$i" | awk '/lastTxRate/ {print $2}')"
   echo
   echo "--- PING 8.8.8.8 (10 tries) ---"
   if have ping; then
-    out=$(ping -c 10 -W 2 8.8.8.8 2>&1 || true)
+    if [ "$OS" = "Darwin" ]; then w=2000; else w=2; fi
+    out=$(ping -c 10 -W "$w" 8.8.8.8 2>&1 || true)
     echo "$out" | awk '/packets transmitted/ {gsub(/[,%]/,""); printf "Packets: sent %d, received %d, lost %d%%\n", $1, $4, ($1-$4)*100/$1}'
     echo "$out" | awk -F'[/= ]+' '/min\/avg\/max/ {printf "Min/Avg/Max: %.0f/%.0f/%.0f ms\n", $(NF-4), $(NF-3), $(NF-2)}'
   else echo "ping not installed"; fi
@@ -77,13 +87,13 @@ Rate (Mbps) : $(echo "$i" | awk '/lastTxRate/ {print $2}')"
   else
     vpn=$(ip -o link show up 2>/dev/null | awk -F': ' '{print $2}' | grep -E '^(tun|tap|wg|ppp|tailscale|nordlynx)')
   fi
-  if [ -n "${vpn:-}" ]; then echo "VPN is CONNECTED:"; echo "$vpn" | sed 's/^/  /'; else echo "No VPN detected"; fi
+  if [ -n "${vpn:-}" ]; then echo "VPN is CONNECTED:"; echo "$vpn" | while IFS= read -r v; do echo "  $v"; done; else echo "No VPN detected"; fi
 
   echo
   echo "--- BROWSERS ---"
   if [ "$OS" = "Darwin" ]; then
-    mv() { p="/Applications/$2.app/Contents/Info.plist"; [ -f "$p" ] && v=$(defaults read "${p%.plist}" CFBundleShortVersionString) || v="not installed"; printf '%-8s: %s\n' "$1" "$v"; }
-    mv Edge "Microsoft Edge"; mv Firefox Firefox; mv Chrome "Google Chrome"; mv Brave "Brave Browser"
+    macver() { p="/Applications/$2.app/Contents/Info.plist"; [ -f "$p" ] && v=$(defaults read "${p%.plist}" CFBundleShortVersionString) || v="not installed"; printf '%-8s: %s\n' "$1" "$v"; }
+    macver Edge "Microsoft Edge"; macver Firefox Firefox; macver Chrome "Google Chrome"; macver Brave "Brave Browser"
   else
     lv() { v="not installed"; for c in "${@:2}"; do have "$c" && { v=$("$c" --version 2>/dev/null | head -1 | sed -E 's/[^0-9]*([0-9][0-9.]*).*/\1/'); break; }; done; printf '%-8s: %s\n' "$1" "$v"; }
     lv Edge microsoft-edge microsoft-edge-stable; lv Firefox firefox; lv Chrome google-chrome google-chrome-stable chromium; lv Brave brave-browser brave

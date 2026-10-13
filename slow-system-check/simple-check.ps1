@@ -55,6 +55,7 @@ if ($rt.Count) { $m = $rt | Measure-Object -Min -Max -Average; Say ("Min/Avg/Max
 Say ''
 Say '--- DOWNLOAD SPEED ---'
 try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     $sw = [Diagnostics.Stopwatch]::StartNew()
     $n  = (New-Object Net.WebClient).DownloadData('https://speed.cloudflare.com/__down?bytes=25000000').Length
     Say ("{0:N0} Mbps" -f (($n * 8) / 1e6 / $sw.Elapsed.TotalSeconds))
@@ -74,7 +75,9 @@ Say ("Firefox : {0}" -f (Ver @("$a\Mozilla Firefox\firefox.exe","$b\Mozilla Fire
 Say ("Chrome  : {0}" -f (Ver @("$a\Google\Chrome\Application\chrome.exe","$b\Google\Chrome\Application\chrome.exe","$c\Google\Chrome\Application\chrome.exe")))
 Say ("Brave   : {0}" -f (Ver @("$a\BraveSoftware\Brave-Browser\Application\brave.exe","$c\BraveSoftware\Brave-Browser\Application\brave.exe")))
 
-$report = Join-Path ([Environment]::GetFolderPath('Desktop')) ("system-report-{0}-{1}.txt" -f $env:COMPUTERNAME, (Get-Date -Format 'yyyy-MM-dd_HHmm'))
+$outDir = [Environment]::GetFolderPath('Desktop')
+if (-not $outDir -or -not (Test-Path $outDir)) { $outDir = $HOME }
+$report = Join-Path $outDir ("system-report-{0}-{1}.txt" -f $env:COMPUTERNAME, (Get-Date -Format 'yyyy-MM-dd_HHmm'))
 $lines | Set-Content -Path $report -Encoding UTF8
 Write-Host ''
 Write-Host "Done. Report saved to $report"
