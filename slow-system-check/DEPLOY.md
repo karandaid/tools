@@ -29,15 +29,15 @@ author automatically.** The client reads the report and chooses to send the file
 | Item | Value |
 |---|---|
 | Repository | https://github.com/karandaid/tools |
-| Commit | `5681be69ecc2b1039dd8374cc824f79a87e53b0f` |
+| Commit | `9579796c771e1dc94ccf4e3eba5e2158b813b93c` |
 | Path | `slow-system-check/` |
 
 SHA-256 of each file at that commit:
 
 ```
-bf342cf09a8f35505ea7db4b40750a72dcf7f3143e55e3beeaaf6658e70234fe  simple-check.ps1   (Windows, PowerShell)
+6ed186c7748c0740470affc061c3188f43c815bfa8fcf410eb420ac41673d02f  simple-check.ps1   (Windows, PowerShell)
 3b9548aff0470ac5b630d304ada2a9efe9ec88d911581083b1aeac4e54f102e1  simple-check.cmd   (Windows launcher)
-0d3113c8e69d499fb80dc32300ae0eb53f75ec9118d08308302a96eab78d39c7  simple-check.sh    (Linux / macOS)
+a8e535c39e52eda31a682e92146e2f7694a3530b1b5686ab4c1b9dd38393b118  simple-check.sh    (Linux / macOS)
 ```
 
 If a hash does not match, do not run the file. Always use the full 40-character commit, never a
@@ -49,11 +49,11 @@ Paste into a normal (non-admin) PowerShell window. It downloads only the script 
 checks its hash, then runs it.
 
 ```powershell
-$sha = '5681be69ecc2b1039dd8374cc824f79a87e53b0f'
+$sha = '9579796c771e1dc94ccf4e3eba5e2158b813b93c'
 $d   = Join-Path $env:TEMP 'slow-check'; New-Item -ItemType Directory -Force $d | Out-Null
 $f   = Join-Path $d 'simple-check.ps1'
 Invoke-WebRequest "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.ps1" -OutFile $f
-if ((Get-FileHash $f -Algorithm SHA256).Hash -ne 'BF342CF09A8F35505EA7DB4B40750A72DCF7F3143E55E3BEEAAF6658E70234FE') { throw 'Hash mismatch - do not run' }
+if ((Get-FileHash $f -Algorithm SHA256).Hash -ne '6ED186C7748C0740470AFFC061C3188F43C815BFA8FCF410EB420AC41673D02F') { throw 'Hash mismatch - do not run' }
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f
 ```
 
@@ -64,9 +64,9 @@ then double-click `simple-check.cmd`.
 ## 4. Deploying: Linux and macOS
 
 ```bash
-sha=5681be69ecc2b1039dd8374cc824f79a87e53b0f
+sha=9579796c771e1dc94ccf4e3eba5e2158b813b93c
 curl -fsSL "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.sh" -o /tmp/simple-check.sh
-echo "0d3113c8e69d499fb80dc32300ae0eb53f75ec9118d08308302a96eab78d39c7  /tmp/simple-check.sh" | shasum -a 256 -c - || exit 1
+echo "a8e535c39e52eda31a682e92146e2f7694a3530b1b5686ab4c1b9dd38393b118  /tmp/simple-check.sh" | shasum -a 256 -c - || exit 1
 bash /tmp/simple-check.sh
 ```
 
@@ -79,9 +79,9 @@ Do not `git clone` (that downloads all history and all branches). Fetch one comm
 ```bash
 git init slow-check && cd slow-check
 git remote add origin https://github.com/karandaid/tools.git
-git fetch --depth 1 origin 5681be69ecc2b1039dd8374cc824f79a87e53b0f
+git fetch --depth 1 origin 9579796c771e1dc94ccf4e3eba5e2158b813b93c
 git checkout FETCH_HEAD
-git rev-parse HEAD     # must print 5681be69ecc2b1039dd8374cc824f79a87e53b0f
+git rev-parse HEAD     # must print 9579796c771e1dc94ccf4e3eba5e2158b813b93c
 ```
 
 Verified: this downloads about 200 KB and produces the same file hashes as listed above.
@@ -106,7 +106,7 @@ This is practical guidance, not legal advice. For anything contractual, have a l
    at the company saying you may diagnose the slowness, that the client runs the check themselves, and
    what you will receive back. Suggested wording:
    > "We authorize Karandeep Singh to review the system report produced by the diagnostic script
-   > (version commit 5681be6) run by our staff. The script is read-only and does not copy our data.
+   > (version commit 9579796) run by our staff. The script is read-only and does not copy our data.
    > He will receive only the report file we choose to send."
 2. **They run it, not you.** No remote desktop, no credentials, no admin access. Then you never
    touched their systems.
