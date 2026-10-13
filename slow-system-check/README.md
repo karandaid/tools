@@ -12,7 +12,12 @@ Wi-Fi quality, latency, download speed, VPN and browser versions. Nothing is mod
 | Windows (double-click / cmd) | `simple-check.cmd` | Runs the `.ps1` next to it; falls back to built-in tools if PowerShell is blocked |
 | Linux and macOS | `simple-check.sh` | `bash simple-check.sh` |
 
-All three are read-only and write the report to the Desktop (or home folder).
+All three are **read-only** and produce the **same report**: identical sections, labels and order
+(COMPUTER, TOP 5 PROGRAMS BY MEMORY, WI-FI, PING, DOWNLOAD SPEED, VPN, BROWSERS), so results from any OS compare directly.
+The `.cmd` fallback (used only when PowerShell is blocked) keeps the headings but gives raw tool output.
+
+Read-only means: no admin rights, no settings, registry, service or software changes. The only file written is the report
+(Desktop, or home folder). The speed test downloads ~25 MB into memory and discards it.
 
 A report is saved to the Desktop as `system-report-<PC>-<date>.txt`. Ask the user to send it back.
 
