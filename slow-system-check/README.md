@@ -4,11 +4,15 @@ Read-only Windows PowerShell script for the first pass when someone says "my sys
 It gathers the usual suspects in one report: RAM pressure, top memory hogs, disk space, uptime,
 Wi-Fi quality, latency, download speed, VPN and browser versions. Nothing is modified.
 
-## Usage
+## Which file for which OS
 
-```powershell
-powershell.exe -ExecutionPolicy Bypass -File .\simple-check.ps1
-```
+| OS | File | Run |
+|---|---|---|
+| Windows (PowerShell) | `simple-check.ps1` | `powershell.exe -ExecutionPolicy Bypass -File .\simple-check.ps1` |
+| Windows (double-click / cmd) | `simple-check.cmd` | Runs the `.ps1` next to it; falls back to built-in tools if PowerShell is blocked |
+| Linux and macOS | `simple-check.sh` | `bash simple-check.sh` |
+
+All three are read-only and write the report to the Desktop (or home folder).
 
 A report is saved to the Desktop as `system-report-<PC>-<date>.txt`. Ask the user to send it back.
 
@@ -27,6 +31,16 @@ git clone https://github.com/karandaid/tools.git
 cd tools\slow-system-check
 powershell.exe -ExecutionPolicy Bypass -File .\simple-check.ps1
 ```
+
+Linux / macOS:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/karandaid/tools/main/slow-system-check/simple-check.sh -o /tmp/simple-check.sh
+bash /tmp/simple-check.sh
+rm /tmp/simple-check.sh
+```
+
+Windows without knowing which shell: send `simple-check.cmd` and `simple-check.ps1` together in one folder and have them double-click the `.cmd`.
 
 Or email/chat them `simple-check.ps1` and have them right-click, then Run with PowerShell
 (or use the `-ExecutionPolicy Bypass` command in Usage above). The script takes about 30 seconds.
