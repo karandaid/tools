@@ -79,38 +79,29 @@ Linux and macOS reports have exactly the same sections and labels.
 
 ## Deploy
 
-Send the client one of these (they paste it into a normal, non-admin PowerShell window):
+Use the pinned, hash-checked commands in [DEPLOY.md](DEPLOY.md) (commit `9579796`).
+They download only the script, verify its SHA-256, then run it. Quick copy:
+
+Windows (PowerShell):
 
 ```powershell
-# Option 1: download and run from the repo (public repo)
-$d = "$env:TEMP\slow-check"; New-Item -ItemType Directory -Force $d | Out-Null
-iwr https://raw.githubusercontent.com/karandaid/tools/main/slow-system-check/simple-check.ps1 -OutFile "$d\simple-check.ps1"
-powershell.exe -ExecutionPolicy Bypass -File "$d\simple-check.ps1"
-
-# Option 2: from a clone
-git clone https://github.com/karandaid/tools.git
-cd tools\slow-system-check
-powershell.exe -ExecutionPolicy Bypass -File .\simple-check.ps1
+$sha = '9579796c771e1dc94ccf4e3eba5e2158b813b93c'
+$d   = Join-Path $env:TEMP 'slow-check'; New-Item -ItemType Directory -Force $d | Out-Null
+$f   = Join-Path $d 'simple-check.ps1'
+Invoke-WebRequest "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.ps1" -OutFile $f
+if ((Get-FileHash $f -Algorithm SHA256).Hash -ne '6ED186C7748C0740470AFFC061C3188F43C815BFA8FCF410EB420AC41673D02F') { throw 'Hash mismatch - do not run' }
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f
 ```
 
-Linux / macOS:
+macOS / Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/karandaid/tools/main/slow-system-check/simple-check.sh -o /tmp/simple-check.sh
-bash /tmp/simple-check.sh
-rm /tmp/simple-check.sh
+sha=9579796c771e1dc94ccf4e3eba5e2158b813b93c
+curl -fsSL "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.sh" -o /tmp/simple-check.sh
+echo "a8e535c39e52eda31a682e92146e2f7694a3530b1b5686ab4c1b9dd38393b118  /tmp/simple-check.sh" | shasum -a 256 -c - && bash /tmp/simple-check.sh
 ```
 
-Windows without knowing which shell: send `simple-check.cmd` and `simple-check.ps1` together in one folder and have them double-click the `.cmd`.
-
-Or email/chat them `simple-check.ps1` and have them right-click, then Run with PowerShell
-(or use the `-ExecutionPolicy Bypass` command in Usage above). The script takes about 30 seconds.
-
-Clean up afterwards:
-
-```powershell
-Remove-Item "$env:TEMP\slow-check" -Recurse -Force
-```
+(On Linux without `shasum`, use `sha256sum -c -`.)
 
 ## Reading the report
 
