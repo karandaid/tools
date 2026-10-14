@@ -21,6 +21,62 @@ Read-only means: no admin rights, no settings, registry, service or software cha
 
 A report is saved to the Desktop as `system-report-<PC>-<date>.txt`. Ask the user to send it back.
 
+## What it generates
+
+One plain-text file, also printed to the screen:
+
+| OS | Saved to |
+|---|---|
+| Windows | `C:\Users\<name>\Desktop\system-report-<PC-NAME>-<yyyy-MM-dd_HHmm>.txt` (the OneDrive Desktop if Desktop is synced; the user folder if there is no Desktop) |
+| macOS | `~/Desktop/system-report-<hostname>-<date>.txt` |
+| Linux | `~/Desktop/...` if that folder exists, otherwise `~/system-report-<hostname>-<date>.txt` |
+| Windows `.cmd` fallback (PowerShell blocked) | `C:\Users\<name>\Desktop\system-report-<PC-NAME>-fallback.txt` |
+
+The last lines on screen show the exact path, e.g. `Done. Report saved to C:\Users\User\Desktop\system-report-LAPTOP-UFA3VOTQ-2026-10-08_1649.txt`.
+
+Sample report (Windows; values from a real client run, shown in the current format):
+
+```
+--- COMPUTER ---
+Model        : LENOVO 82JW
+OS           : Microsoft Windows 11 Pro (build 26200)
+CPU          : AMD Ryzen 7 5800H with Radeon Graphics (16 threads)
+Memory       : 63.9 GB total, 13.1 GB free
+Disk         : 637 GB free of 952 GB
+Last restart : 2026-09-24 23:47:49
+
+--- TOP 5 PROGRAMS BY MEMORY ---
+Memory Compression              14727 MB
+brave                           13278 MB
+Code                             8107 MB
+msedge                           5181 MB
+svchost                          2455 MB
+
+--- WI-FI ---
+SSID : Elephant
+Signal : 100%
+Rate (Mbps) : 866.7
+
+--- PING 8.8.8.8 (10 tries) ---
+Packets: sent 10, received 10, lost 0%
+Min/Avg/Max: 63/66/73 ms
+
+--- DOWNLOAD SPEED ---
+45 Mbps
+
+--- VPN ---
+VPN is CONNECTED:
+  Local Area Connection
+
+--- BROWSERS ---
+Edge    : 154.0.4258.37
+Firefox : 157.0.1
+Chrome  : not installed
+Brave   : not installed
+```
+
+Linux and macOS reports have exactly the same sections and labels.
+
 ## Deploy
 
 Send the client one of these (they paste it into a normal, non-admin PowerShell window):
