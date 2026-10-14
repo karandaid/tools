@@ -17,22 +17,26 @@ All three are **read-only** and produce the **same report**: identical sections,
 The `.cmd` fallback (used only when PowerShell is blocked) keeps the headings but gives raw tool output.
 
 Read-only means: no admin rights, no settings, registry, service or software changes. The only file written is the report
-(Desktop, or home folder). The speed test downloads ~25 MB into memory and discards it.
+(the current folder, or the home folder if that is not writable). The speed test downloads ~25 MB into memory and discards it.
 
-A report is saved to the Desktop as `system-report-<PC>-<date>.txt`. Ask the user to send it back.
+A report is saved in the current folder as `system-report-<PC>-<date>.txt`. Ask the user to send it back.
 
 ## What it generates
 
 One plain-text file, also printed to the screen:
 
-| OS | Saved to |
-|---|---|
-| Windows | `C:\Users\<name>\Desktop\system-report-<PC-NAME>-<yyyy-MM-dd_HHmm>.txt` (the OneDrive Desktop if Desktop is synced; the user folder if there is no Desktop) |
-| macOS | `~/Desktop/system-report-<hostname>-<date>.txt` |
-| Linux | `~/Desktop/...` if that folder exists, otherwise `~/system-report-<hostname>-<date>.txt` |
-| Windows `.cmd` fallback (PowerShell blocked) | `C:\Users\<name>\Desktop\system-report-<PC-NAME>-fallback.txt` |
+The report is saved **in the folder the script is run from** (the current folder), on every OS:
 
-The last lines on screen show the exact path, e.g. `Done. Report saved to C:\Users\User\Desktop\system-report-LAPTOP-UFA3VOTQ-2026-10-08_1649.txt`.
+| How it is run | Report location |
+|---|---|
+| Windows: double-click `simple-check.cmd` | Next to the `.cmd` file (also with "Run as administrator") |
+| Windows: `powershell -File ...\simple-check.ps1` | The folder PowerShell is in, e.g. `C:\Users\<name>\` |
+| macOS / Linux: `bash simple-check.sh` | The folder Terminal is in (`pwd`), e.g. `~/` |
+
+File name: `system-report-<PC-NAME>-<yyyy-MM-dd_HHmm>.txt` (`system-report-<PC-NAME>-fallback.txt` for the `.cmd`
+fallback). If the current folder is not writable, the report goes to the user's home folder instead.
+
+The last lines on screen show the exact path, e.g. `Done. Report saved to C:\Users\User\system-report-LAPTOP-UFA3VOTQ-2026-10-08_1649.txt`.
 
 Sample report (Windows; values from a real client run, shown in the current format):
 
@@ -79,26 +83,26 @@ Linux and macOS reports have exactly the same sections and labels.
 
 ## Deploy
 
-Use the pinned, hash-checked commands in [DEPLOY.md](DEPLOY.md) (commit `9579796`).
+Use the pinned, hash-checked commands in [DEPLOY.md](DEPLOY.md) (commit `1bc4299`).
 They download only the script, verify its SHA-256, then run it. Quick copy:
 
 Windows (PowerShell):
 
 ```powershell
-$sha = '9579796c771e1dc94ccf4e3eba5e2158b813b93c'
+$sha = '1bc42994fb83e8b8ff50968e6aa53281109bc58a'
 $d   = Join-Path $env:TEMP 'slow-check'; New-Item -ItemType Directory -Force $d | Out-Null
 $f   = Join-Path $d 'simple-check.ps1'
 Invoke-WebRequest "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.ps1" -OutFile $f
-if ((Get-FileHash $f -Algorithm SHA256).Hash -ne '6ED186C7748C0740470AFFC061C3188F43C815BFA8FCF410EB420AC41673D02F') { throw 'Hash mismatch - do not run' }
+if ((Get-FileHash $f -Algorithm SHA256).Hash -ne '8F720364AD1EA380EF8DE0F507C6EEEA94F27D36B067436BD656C0AA78C5C2C2') { throw 'Hash mismatch - do not run' }
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f
 ```
 
 macOS / Linux:
 
 ```bash
-sha=9579796c771e1dc94ccf4e3eba5e2158b813b93c
+sha=1bc42994fb83e8b8ff50968e6aa53281109bc58a
 curl -fsSL "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.sh" -o /tmp/simple-check.sh
-echo "a8e535c39e52eda31a682e92146e2f7694a3530b1b5686ab4c1b9dd38393b118  /tmp/simple-check.sh" | shasum -a 256 -c - && bash /tmp/simple-check.sh
+echo "653848bbe80efcb154c053c671478036e050ee26a1be1a291bb62d6ba175417e  /tmp/simple-check.sh" | shasum -a 256 -c - && bash /tmp/simple-check.sh
 ```
 
 (On Linux without `shasum`, use `sha256sum -c -`.)

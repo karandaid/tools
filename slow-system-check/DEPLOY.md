@@ -14,7 +14,8 @@ whether a VPN adapter is up, installed browser versions.
 **Never touches:** documents, files, email, passwords, browser history or cookies, screenshots,
 keystrokes, clipboard, user accounts, network shares, or any other machine.
 
-**Writes:** one plain-text report on the Desktop (or home folder). Nothing else on disk, no registry,
+**Writes:** one plain-text report in the folder the script is run from (the user's home folder if that
+folder is not writable). Nothing else on disk, no registry,
 service, setting or software change. No admin rights needed.
 
 **Network:** two outbound requests only, a ping to 8.8.8.8 and a ~25 MB download from
@@ -29,15 +30,15 @@ author automatically.** The client reads the report and chooses to send the file
 | Item | Value |
 |---|---|
 | Repository | https://github.com/karandaid/tools |
-| Commit | `9579796c771e1dc94ccf4e3eba5e2158b813b93c` |
+| Commit | `1bc42994fb83e8b8ff50968e6aa53281109bc58a` |
 | Path | `slow-system-check/` |
 
 SHA-256 of each file at that commit:
 
 ```
-6ed186c7748c0740470affc061c3188f43c815bfa8fcf410eb420ac41673d02f  simple-check.ps1   (Windows, PowerShell)
-3b9548aff0470ac5b630d304ada2a9efe9ec88d911581083b1aeac4e54f102e1  simple-check.cmd   (Windows launcher)
-a8e535c39e52eda31a682e92146e2f7694a3530b1b5686ab4c1b9dd38393b118  simple-check.sh    (Linux / macOS)
+8f720364ad1ea380ef8de0f507c6eeea94f27d36b067436bd656c0aa78c5c2c2  simple-check.ps1   (Windows, PowerShell)
+c5ea82e672a5fbdb25a37980034ca3e59d6a637cab9a260933e061ffbb1185b4  simple-check.cmd   (Windows launcher)
+653848bbe80efcb154c053c671478036e050ee26a1be1a291bb62d6ba175417e  simple-check.sh    (Linux / macOS)
 ```
 
 If a hash does not match, do not run the file. Always use the full 40-character commit, never a
@@ -49,24 +50,24 @@ Paste into a normal (non-admin) PowerShell window. It downloads only the script 
 checks its hash, then runs it.
 
 ```powershell
-$sha = '9579796c771e1dc94ccf4e3eba5e2158b813b93c'
+$sha = '1bc42994fb83e8b8ff50968e6aa53281109bc58a'
 $d   = Join-Path $env:TEMP 'slow-check'; New-Item -ItemType Directory -Force $d | Out-Null
 $f   = Join-Path $d 'simple-check.ps1'
 Invoke-WebRequest "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.ps1" -OutFile $f
-if ((Get-FileHash $f -Algorithm SHA256).Hash -ne '6ED186C7748C0740470AFFC061C3188F43C815BFA8FCF410EB420AC41673D02F') { throw 'Hash mismatch - do not run' }
+if ((Get-FileHash $f -Algorithm SHA256).Hash -ne '8F720364AD1EA380EF8DE0F507C6EEEA94F27D36B067436BD656C0AA78C5C2C2') { throw 'Hash mismatch - do not run' }
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f
 ```
 
 Offline or locked-down PC: email `simple-check.ps1` and `simple-check.cmd` together, ask the client to
 check the hash with `Get-FileHash .\simple-check.ps1` (or `certutil -hashfile simple-check.ps1 SHA256`),
-then double-click `simple-check.cmd`.
+then double-click `simple-check.cmd`. The report is saved next to the two files.
 
 ## 4. Deploying: Linux and macOS
 
 ```bash
-sha=9579796c771e1dc94ccf4e3eba5e2158b813b93c
+sha=1bc42994fb83e8b8ff50968e6aa53281109bc58a
 curl -fsSL "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.sh" -o /tmp/simple-check.sh
-echo "a8e535c39e52eda31a682e92146e2f7694a3530b1b5686ab4c1b9dd38393b118  /tmp/simple-check.sh" | shasum -a 256 -c - || exit 1
+echo "653848bbe80efcb154c053c671478036e050ee26a1be1a291bb62d6ba175417e  /tmp/simple-check.sh" | shasum -a 256 -c - || exit 1
 bash /tmp/simple-check.sh
 ```
 
@@ -79,9 +80,9 @@ Do not `git clone` (that downloads all history and all branches). Fetch one comm
 ```bash
 git init slow-check && cd slow-check
 git remote add origin https://github.com/karandaid/tools.git
-git fetch --depth 1 origin 9579796c771e1dc94ccf4e3eba5e2158b813b93c
+git fetch --depth 1 origin 1bc42994fb83e8b8ff50968e6aa53281109bc58a
 git checkout FETCH_HEAD
-git rev-parse HEAD     # must print 9579796c771e1dc94ccf4e3eba5e2158b813b93c
+git rev-parse HEAD     # must print 1bc42994fb83e8b8ff50968e6aa53281109bc58a
 ```
 
 Verified: this downloads about 200 KB and produces the same file hashes as listed above.
@@ -96,7 +97,8 @@ Remove-Item "$env:TEMP\slow-check" -Recurse -Force      # Windows
 rm -f /tmp/simple-check.sh                              # Linux / macOS
 ```
 
-The report stays on the Desktop until the client deletes it.
+The report stays in the folder the script was run from (for the commands above, the folder PowerShell or
+Terminal was in, usually `C:\Users\<name>` or `~`). It is not deleted by the clean-up.
 
 ## 7. Protecting yourself against a false data-theft claim
 
@@ -106,7 +108,7 @@ This is practical guidance, not legal advice. For anything contractual, have a l
    at the company saying you may diagnose the slowness, that the client runs the check themselves, and
    what you will receive back. Suggested wording:
    > "We authorize Karandeep Singh to review the system report produced by the diagnostic script
-   > (version commit 9579796) run by our staff. The script is read-only and does not copy our data.
+   > (version commit 1bc4299) run by our staff. The script is read-only and does not copy our data.
    > He will receive only the report file we choose to send."
 2. **They run it, not you.** No remote desktop, no credentials, no admin access. Then you never
    touched their systems.
