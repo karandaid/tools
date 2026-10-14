@@ -5,7 +5,7 @@
 .DESCRIPTION
     Reads system info, top 5 programs by memory, Wi-Fi, ping, download speed, VPN and browsers.
     Changes nothing: no registry, services, settings or installs; no admin rights needed.
-    The only file written is the report (Desktop). The speed test downloads ~25 MB to memory.
+    The only file written is the report, in the current folder. The speed test downloads ~25 MB to memory.
 
 .NOTES
     Author : Karandeep Singh <karandaid@gmail.com>
@@ -75,10 +75,11 @@ Say ("Firefox : {0}" -f (Ver @("$a\Mozilla Firefox\firefox.exe","$b\Mozilla Fire
 Say ("Chrome  : {0}" -f (Ver @("$a\Google\Chrome\Application\chrome.exe","$b\Google\Chrome\Application\chrome.exe","$c\Google\Chrome\Application\chrome.exe")))
 Say ("Brave   : {0}" -f (Ver @("$a\BraveSoftware\Brave-Browser\Application\brave.exe","$c\BraveSoftware\Brave-Browser\Application\brave.exe")))
 
-$outDir = [Environment]::GetFolderPath('Desktop')
-if (-not $outDir -or -not (Test-Path $outDir)) { $outDir = $HOME }
-$report = Join-Path $outDir ("system-report-{0}-{1}.txt" -f $env:COMPUTERNAME, (Get-Date -Format 'yyyy-MM-dd_HHmm'))
-$lines | Set-Content -Path $report -Encoding UTF8
+# Save in the folder the script is run from; fall back to the user's home folder if it is not writable
+$name   = "system-report-{0}-{1}.txt" -f $env:COMPUTERNAME, (Get-Date -Format 'yyyy-MM-dd_HHmm')
+$report = Join-Path (Get-Location).ProviderPath $name
+try { $lines | Set-Content -Path $report -Encoding UTF8 -ErrorAction Stop }
+catch { $report = Join-Path $HOME $name; $lines | Set-Content -Path $report -Encoding UTF8 }
 Write-Host ''
 Write-Host "Done. Report saved to $report"
 Write-Host 'Please send that file back.'

@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # Read-only health check for a slow Linux or macOS machine. Same report layout as simple-check.ps1.
-# Changes nothing on the system; the only file written is the report (~/Desktop or $HOME).
+# Changes nothing on the system; the only file written is the report, in the current folder.
 #
 # Author: Karandeep Singh <karandaid@gmail.com>
 # Run:    bash simple-check.sh
 set -u
 OS="$(uname -s)"
 HOST="$(hostname)"
-OUTDIR="$HOME/Desktop"; [ -d "$OUTDIR" ] || OUTDIR="$HOME"
+# Save in the folder the script is run from; fall back to $HOME if it is not writable
+OUTDIR="$PWD"; [ -w "$OUTDIR" ] || OUTDIR="$HOME"
 REPORT="$OUTDIR/system-report-$HOST-$(date +%Y-%m-%d_%H%M).txt"
 
 have() { command -v "$1" >/dev/null 2>&1; }
