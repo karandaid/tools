@@ -5,6 +5,15 @@ Author: Karandeep Singh (karandaid@gmail.com)
 This guide covers how to hand the check to a client, how to make sure they run exactly the code
 that was published, and how to show afterwards that no client data was taken.
 
+**Quick reference**
+
+| Client's OS | What to send | Report appears |
+|---|---|---|
+| Windows | The PowerShell block in section 3 | In the folder PowerShell is open in (usually `C:\Users\<name>`) |
+| Windows, no internet / scripts blocked | `simple-check.ps1` + `simple-check.cmd` (section 3, offline) | Next to the two files |
+| macOS / Linux | The Terminal block in section 4 | In the folder Terminal is open in (usually `~`) |
+| Unknown | Sections 3 and 4 both; the client uses the one for their OS | as above |
+
 ## 1. What the check does and does not do
 
 **Reads:** computer model, OS version, CPU, RAM, free disk space, last restart time, the names and
@@ -47,7 +56,8 @@ branch name, so the code cannot change after you send the instructions.
 ## 3. Deploying: Windows
 
 Paste into a normal (non-admin) PowerShell window. It downloads only the script at the pinned commit,
-checks its hash, then runs it.
+checks its hash, then runs it. The report is saved in the folder PowerShell is open in. To put it
+somewhere specific, run `cd <folder>` first, e.g. `cd $HOME\Desktop`.
 
 ```powershell
 $sha = '1bc42994fb83e8b8ff50968e6aa53281109bc58a'
@@ -58,11 +68,23 @@ if ((Get-FileHash $f -Algorithm SHA256).Hash -ne '8F720364AD1EA380EF8DE0F507C6EE
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f
 ```
 
-Offline or locked-down PC: email `simple-check.ps1` and `simple-check.cmd` together, ask the client to
-check the hash with `Get-FileHash .\simple-check.ps1` (or `certutil -hashfile simple-check.ps1 SHA256`),
-then double-click `simple-check.cmd`. The report is saved next to the two files.
+Offline or locked-down PC: email `simple-check.ps1` and `simple-check.cmd` together and ask the client to
+put them in one folder. Before running, they check both hashes against section 2 from a Command Prompt
+in that folder:
+
+```
+certutil -hashfile simple-check.ps1 SHA256
+certutil -hashfile simple-check.cmd SHA256
+```
+
+Then they double-click `simple-check.cmd`. The report is saved next to the two files, also with
+"Run as administrator". If PowerShell is blocked, the `.cmd` writes a basic fallback report
+(`system-report-<PC-NAME>-fallback.txt`) with the same headings.
 
 ## 4. Deploying: Linux and macOS
+
+Paste into Terminal. The report is saved in the folder Terminal is in (`pwd`); `cd` somewhere else
+first to change that.
 
 ```bash
 sha=1bc42994fb83e8b8ff50968e6aa53281109bc58a
@@ -85,7 +107,16 @@ git checkout FETCH_HEAD
 git rev-parse HEAD     # must print 1bc42994fb83e8b8ff50968e6aa53281109bc58a
 ```
 
-Verified: this downloads about 200 KB and produces the same file hashes as listed above.
+Then run from the folder where you want the report:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\slow-system-check\simple-check.ps1   # Windows
+```
+```bash
+bash slow-system-check/simple-check.sh                                                     # Linux / macOS
+```
+
+Verified: this downloads about 210 KB and produces the same file hashes as listed above.
 The repo sets `-text` in `.gitattributes`, so Windows git will not change line endings and the hashes hold.
 
 ## 6. Clean up after the run
@@ -100,7 +131,38 @@ rm -f /tmp/simple-check.sh                              # Linux / macOS
 The report stays in the folder the script was run from (for the commands above, the folder PowerShell or
 Terminal was in, usually `C:\Users\<name>` or `~`). It is not deleted by the clean-up.
 
-## 7. Protecting yourself against a false data-theft claim
+## 7. What the client sends back
+
+One text file, `system-report-<PC-NAME>-<yyyy-MM-dd_HHmm>.txt`. The last line on screen shows the exact
+path, e.g. `Done. Report saved to C:\Users\User\system-report-LAPTOP-UFA3VOTQ-2026-10-08_1649.txt`.
+If the current folder is not writable, it is saved in the user's home folder instead.
+
+Every OS produces the same sections in the same order:
+
+```
+--- COMPUTER ---
+Model        : LENOVO 82JW
+OS           : Microsoft Windows 11 Pro (build 26200)
+CPU          : AMD Ryzen 7 5800H with Radeon Graphics (16 threads)
+Memory       : 63.9 GB total, 13.1 GB free
+Disk         : 637 GB free of 952 GB
+Last restart : 2026-09-24 23:47:49
+
+--- TOP 5 PROGRAMS BY MEMORY ---
+Memory Compression              14727 MB
+brave                           13278 MB
+...
+
+--- WI-FI ---            SSID, Signal, Rate (Mbps)
+--- PING 8.8.8.8 (10 tries) ---   packets sent/received/lost, min/avg/max ms
+--- DOWNLOAD SPEED ---   Mbps
+--- VPN ---              connected adapter names, or "No VPN detected"
+--- BROWSERS ---         Edge, Firefox, Chrome, Brave versions
+```
+
+The full sample is in `README.md`.
+
+## 8. Protecting yourself against a false data-theft claim
 
 This is practical guidance, not legal advice. For anything contractual, have a lawyer review it.
 
@@ -109,11 +171,11 @@ This is practical guidance, not legal advice. For anything contractual, have a l
    what you will receive back. Suggested wording:
    > "We authorize Karandeep Singh to review the system report produced by the diagnostic script
    > (version commit 1bc4299) run by our staff. The script is read-only and does not copy our data.
-   > He will receive only the report file we choose to send."
+   > Karandeep Singh will receive only the report file we choose to send."
 2. **They run it, not you.** No remote desktop, no credentials, no admin access. Then you never
    touched their systems.
 3. **Send the pinned commit and hashes** (sections 2 to 4) in the same email. This proves what code
-   was given and lets their IT audit it. The script is about 100 lines of readable text.
+   was given and lets their IT audit it. Each script is about 40 to 110 lines of readable text.
 4. **Offer an audit path.** Their IT can read the script, or run it in a throwaway VM, or watch outbound
    traffic. They will see only the ping and the Cloudflare speed-test download.
 5. **Receive only the report.** Accept the single `.txt` file. Do not accept screenshots of their
@@ -126,6 +188,6 @@ This is practical guidance, not legal advice. For anything contractual, have a l
 8. **Sign if they want it.** If they ask for an NDA, sign it. The report content is already limited to
    system performance facts.
 
-## 8. Reading the report
+## 9. Reading the report
 
 See `README.md` for the red flags per section and a worked example.
