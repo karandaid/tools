@@ -4,6 +4,11 @@ Read-only Windows PowerShell script for the first pass when someone says "my sys
 It gathers the usual suspects in one report: RAM pressure, top memory hogs, disk space, uptime,
 Wi-Fi quality, latency, download speed, VPN and browser versions. Nothing is modified.
 
+## Documents
+
+- [CLIENT.md](CLIENT.md): send this to the client. What the check does and does not do, how to run and verify it.
+- [DEPLOY.md](DEPLOY.md): for you. Pinned release, deployment options, field reference, record keeping.
+
 ## Which file for which OS
 
 | OS | File | Run |
@@ -41,6 +46,9 @@ The last lines on screen show the exact path, e.g. `Done. Report saved to C:\Use
 Sample report (Windows; values from a real client run, shown in the current format):
 
 ```
+Slow System Check v1.1 (read-only)
+Run at       : 2026-10-08 16:49:37
+
 --- COMPUTER ---
 Model        : LENOVO 82JW
 OS           : Microsoft Windows 11 Pro (build 26200)
@@ -83,26 +91,26 @@ Linux and macOS reports have exactly the same sections and labels.
 
 ## Deploy
 
-Use the pinned, hash-checked commands in [DEPLOY.md](DEPLOY.md) (commit `1bc4299`).
+Use the pinned, hash-checked commands in [DEPLOY.md](DEPLOY.md) (commit `4794caa`).
 They download only the script, verify its SHA-256, then run it. Quick copy:
 
 Windows (PowerShell):
 
 ```powershell
-$sha = '1bc42994fb83e8b8ff50968e6aa53281109bc58a'
+$sha = '4794caa342d092aa71d197a63b2d7d7cc6da81af'
 $d   = Join-Path $env:TEMP 'slow-check'; New-Item -ItemType Directory -Force $d | Out-Null
 $f   = Join-Path $d 'simple-check.ps1'
 Invoke-WebRequest "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.ps1" -OutFile $f
-if ((Get-FileHash $f -Algorithm SHA256).Hash -ne '8F720364AD1EA380EF8DE0F507C6EEEA94F27D36B067436BD656C0AA78C5C2C2') { throw 'Hash mismatch - do not run' }
+if ((Get-FileHash $f -Algorithm SHA256).Hash -ne 'B8089D1AEE7A3232E8D9906020D851AC0D41982698B94D29F04921AD6820F771') { throw 'Hash mismatch - do not run' }
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f
 ```
 
 macOS / Linux:
 
 ```bash
-sha=1bc42994fb83e8b8ff50968e6aa53281109bc58a
+sha=4794caa342d092aa71d197a63b2d7d7cc6da81af
 curl -fsSL "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.sh" -o /tmp/simple-check.sh
-echo "653848bbe80efcb154c053c671478036e050ee26a1be1a291bb62d6ba175417e  /tmp/simple-check.sh" | shasum -a 256 -c - && bash /tmp/simple-check.sh
+echo "c914be9768f34a62ed683a5de4e54bc27bb81d7ed7d3e45dc28b4f62c131253a  /tmp/simple-check.sh" | shasum -a 256 -c - && bash /tmp/simple-check.sh
 ```
 
 (On Linux without `shasum`, use `sha256sum -c -`.)

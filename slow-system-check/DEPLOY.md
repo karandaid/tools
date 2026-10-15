@@ -14,6 +14,9 @@ that was published, and how to show afterwards that no client data was taken.
 | macOS / Linux | The Terminal block in section 4 | In the folder Terminal is open in (usually `~`) |
 | Unknown | Sections 3 and 4 both; the client uses the one for their OS | as above |
 
+**Send the client `CLIENT.md`, not this file.** It is written for them and their IT team. This guide
+is for you and includes internal notes (section 8).
+
 ## 1. What the check does and does not do
 
 **Reads:** computer model, OS version, CPU, RAM, free disk space, last restart time, the names and
@@ -27,6 +30,9 @@ keystrokes, clipboard, user accounts, network shares, or any other machine.
 folder is not writable). Nothing else on disk, no registry,
 service, setting or software change. No admin rights needed.
 
+**Consent:** before reading anything, the script shows what it will and will not do and waits for the
+client to press Enter. Closing the window at that point cancels it with nothing read or written.
+
 **Network:** two outbound requests only, a ping to 8.8.8.8 and a ~25 MB download from
 `speed.cloudflare.com` (discarded in memory). **Nothing is uploaded and nothing is sent to the
 author automatically.** The client reads the report and chooses to send the file back.
@@ -39,15 +45,15 @@ author automatically.** The client reads the report and chooses to send the file
 | Item | Value |
 |---|---|
 | Repository | https://github.com/karandaid/tools |
-| Commit | `1bc42994fb83e8b8ff50968e6aa53281109bc58a` |
+| Commit | `4794caa342d092aa71d197a63b2d7d7cc6da81af` |
 | Path | `slow-system-check/` |
 
 SHA-256 of each file at that commit:
 
 ```
-8f720364ad1ea380ef8de0f507c6eeea94f27d36b067436bd656c0aa78c5c2c2  simple-check.ps1   (Windows, PowerShell)
-c5ea82e672a5fbdb25a37980034ca3e59d6a637cab9a260933e061ffbb1185b4  simple-check.cmd   (Windows launcher)
-653848bbe80efcb154c053c671478036e050ee26a1be1a291bb62d6ba175417e  simple-check.sh    (Linux / macOS)
+b8089d1aee7a3232e8d9906020d851ac0d41982698b94d29f04921ad6820f771  simple-check.ps1   (Windows, PowerShell)
+e7de37fe80a4dc239d23ba983aee296330e0661842b66962422f21c10d0733e1  simple-check.cmd   (Windows launcher)
+c914be9768f34a62ed683a5de4e54bc27bb81d7ed7d3e45dc28b4f62c131253a  simple-check.sh    (Linux / macOS)
 ```
 
 If a hash does not match, do not run the file. Always use the full 40-character commit, never a
@@ -60,11 +66,11 @@ checks its hash, then runs it. The report is saved in the folder PowerShell is o
 somewhere specific, run `cd <folder>` first, e.g. `cd $HOME\Desktop`.
 
 ```powershell
-$sha = '1bc42994fb83e8b8ff50968e6aa53281109bc58a'
+$sha = '4794caa342d092aa71d197a63b2d7d7cc6da81af'
 $d   = Join-Path $env:TEMP 'slow-check'; New-Item -ItemType Directory -Force $d | Out-Null
 $f   = Join-Path $d 'simple-check.ps1'
 Invoke-WebRequest "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.ps1" -OutFile $f
-if ((Get-FileHash $f -Algorithm SHA256).Hash -ne '8F720364AD1EA380EF8DE0F507C6EEEA94F27D36B067436BD656C0AA78C5C2C2') { throw 'Hash mismatch - do not run' }
+if ((Get-FileHash $f -Algorithm SHA256).Hash -ne 'B8089D1AEE7A3232E8D9906020D851AC0D41982698B94D29F04921AD6820F771') { throw 'Hash mismatch - do not run' }
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f
 ```
 
@@ -87,9 +93,9 @@ Paste into Terminal. The report is saved in the folder Terminal is in (`pwd`); `
 first to change that.
 
 ```bash
-sha=1bc42994fb83e8b8ff50968e6aa53281109bc58a
+sha=4794caa342d092aa71d197a63b2d7d7cc6da81af
 curl -fsSL "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.sh" -o /tmp/simple-check.sh
-echo "653848bbe80efcb154c053c671478036e050ee26a1be1a291bb62d6ba175417e  /tmp/simple-check.sh" | shasum -a 256 -c - || exit 1
+echo "c914be9768f34a62ed683a5de4e54bc27bb81d7ed7d3e45dc28b4f62c131253a  /tmp/simple-check.sh" | shasum -a 256 -c - || exit 1
 bash /tmp/simple-check.sh
 ```
 
@@ -102,9 +108,9 @@ Do not `git clone` (that downloads all history and all branches). Fetch one comm
 ```bash
 git init slow-check && cd slow-check
 git remote add origin https://github.com/karandaid/tools.git
-git fetch --depth 1 origin 1bc42994fb83e8b8ff50968e6aa53281109bc58a
+git fetch --depth 1 origin 4794caa342d092aa71d197a63b2d7d7cc6da81af
 git checkout FETCH_HEAD
-git rev-parse HEAD     # must print 1bc42994fb83e8b8ff50968e6aa53281109bc58a
+git rev-parse HEAD     # must print 4794caa342d092aa71d197a63b2d7d7cc6da81af
 ```
 
 Then run from the folder where you want the report:
@@ -137,9 +143,13 @@ One text file, `system-report-<PC-NAME>-<yyyy-MM-dd_HHmm>.txt`. The last line on
 path, e.g. `Done. Report saved to C:\Users\User\system-report-LAPTOP-UFA3VOTQ-2026-10-08_1649.txt`.
 If the current folder is not writable, it is saved in the user's home folder instead.
 
-Every OS produces the same sections in the same order:
+Every OS produces the same sections in the same order. The first line names the version, so a report
+can always be matched to the exact code:
 
 ```
+Slow System Check v1.1 (read-only)
+Run at       : 2026-10-08 16:49:37
+
 --- COMPUTER ---
 Model        : LENOVO 82JW
 OS           : Microsoft Windows 11 Pro (build 26200)
@@ -163,6 +173,8 @@ brave                           13278 MB
 The full sample is in `README.md`.
 
 ### What each line means
+
+`Slow System Check v1.1` and `Run at` identify the script version and when it ran.
 
 Each value below says what it is, where the script reads it on each OS, and how to judge it. The
 thresholds are rules of thumb, not hard limits.
@@ -238,7 +250,7 @@ This is practical guidance, not legal advice. For anything contractual, have a l
    at the company saying you may diagnose the slowness, that the client runs the check themselves, and
    what you will receive back. Suggested wording:
    > "We authorize Karandeep Singh to review the system report produced by the diagnostic script
-   > (version commit 1bc4299) run by our staff. The script is read-only and does not copy our data.
+   > (version commit 4794caa) run by our staff. The script is read-only and does not copy our data.
    > Karandeep Singh will receive only the report file we choose to send."
 2. **They run it, not you.** No remote desktop, no credentials, no admin access. Then you never
    touched their systems.
