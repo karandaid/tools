@@ -13,7 +13,24 @@ REPORT="$OUTDIR/system-report-$HOST-$(date +%Y-%m-%d_%H%M).txt"
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
+notice() {
+  echo 'Slow System Check v1.1 - by Karandeep Singh <karandaid@gmail.com>'
+  echo 
+  echo 'This check is READ-ONLY. It will:'
+  echo '  - read basic system facts: model, OS, CPU, memory, disk, last restart,'
+  echo '    top 5 programs by memory, Wi-Fi, ping, download speed, VPN, browser versions'
+  echo '  - ping 8.8.8.8 and download a 25 MB test file from speed.cloudflare.com (not saved)'
+  echo '  - save ONE text report in this folder and show it on screen'
+  echo 'It will NOT read your files, email, passwords or browser data, change any'
+  echo 'setting, install anything, or send anything anywhere. You review the report'
+  echo 'and decide whether to send it.'
+  echo 
+}
+
 report() {
+  echo "Slow System Check v1.1 (read-only)"
+  echo "Run at       : $(date '+%Y-%m-%d %H:%M:%S')"
+  echo
   echo "--- COMPUTER ---"
   if [ "$OS" = "Darwin" ]; then
     echo "Model        : $(sysctl -n hw.model)"
@@ -101,7 +118,11 @@ Rate (Mbps) : $(echo "$i" | awk '/lastTxRate/ {print $2}')"
   fi
 }
 
+notice
+if { : < /dev/tty; } 2>/dev/null; then
+  printf 'Press Enter to start, or Ctrl+C to cancel: '; read -r _ < /dev/tty; echo
+fi
 report 2>&1 | tee "$REPORT"
 echo
 echo "Done. Report saved to $REPORT"
-echo "Please send that file back."
+echo "Please open it, check it, and send it back if you are happy with the contents."

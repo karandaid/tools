@@ -13,6 +13,10 @@ if exist "%HERE%simple-check.ps1" (
 )
 
 echo PowerShell unavailable - using basic fallback.
+echo This fallback is READ-ONLY: it lists system info, running programs, Wi-Fi and ping,
+echo saves ONE text report in this folder, and sends nothing anywhere.
+echo Press any key to start, or close this window to cancel.
+pause >nul
 set "OUT=%CD%\system-report-%COMPUTERNAME%-fallback.txt"
 (
   echo --- COMPUTER ---
@@ -36,6 +40,6 @@ set "OUT=%CD%\system-report-%COMPUTERNAME%-fallback.txt"
   echo Not collected in fallback mode.
 ) > "%OUT%" 2>&1
 echo Done. Report saved to %OUT%
-echo Please send that file back.
+echo Please open it, check it, and send it back if you are happy with the contents.
 :done
 pause

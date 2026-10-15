@@ -16,6 +16,24 @@ $ErrorActionPreference = 'SilentlyContinue'
 $lines = New-Object System.Collections.Generic.List[string]
 function Say([string]$t = '') { $lines.Add($t); Write-Host $t }
 
+Write-Host 'Slow System Check v1.1 - by Karandeep Singh <karandaid@gmail.com>'
+Write-Host ''
+Write-Host 'This check is READ-ONLY. It will:'
+Write-Host '  - read basic system facts: model, OS, CPU, memory, disk, last restart,'
+Write-Host '    top 5 programs by memory, Wi-Fi, ping, download speed, VPN, browser versions'
+Write-Host '  - ping 8.8.8.8 and download a 25 MB test file from speed.cloudflare.com (not saved)'
+Write-Host '  - save ONE text report in this folder and show it on screen'
+Write-Host 'It will NOT read your files, email, passwords or browser data, change any'
+Write-Host 'setting, install anything, or send anything anywhere. You review the report'
+Write-Host 'and decide whether to send it.'
+Write-Host ''
+$null = Read-Host 'Press Enter to start, or close this window to cancel'
+Write-Host ''
+
+Say 'Slow System Check v1.1 (read-only)'
+Say ("Run at       : {0}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))
+Say ''
+
 Say '--- COMPUTER ---'
 $cs  = Get-CimInstance Win32_ComputerSystem
 $os  = Get-CimInstance Win32_OperatingSystem
@@ -82,4 +100,4 @@ try { $lines | Set-Content -Path $report -Encoding UTF8 -ErrorAction Stop }
 catch { $report = Join-Path $HOME $name; $lines | Set-Content -Path $report -Encoding UTF8 }
 Write-Host ''
 Write-Host "Done. Report saved to $report"
-Write-Host 'Please send that file back.'
+Write-Host 'Please open it, check it, and send it back if you are happy with the contents.'
