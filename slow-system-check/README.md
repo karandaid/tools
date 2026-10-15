@@ -1,8 +1,10 @@
 # Slow System Check
 
-Read-only Windows PowerShell script for the first pass when someone says "my system is very slow".
-It gathers the usual suspects in one report: RAM pressure, top memory hogs, disk space, uptime,
-Wi-Fi quality, latency, download speed, VPN and browser versions. Nothing is modified.
+Read-only diagnostic (v1.1) for Windows, macOS and Linux, for the first pass when someone says
+"my system is very slow". It gathers the usual suspects in one report: RAM pressure, top memory hogs,
+disk space, uptime, Wi-Fi quality, latency, download speed, VPN and browser versions. Nothing is modified.
+
+Current pinned release: commit `4794caa` (full hash and fingerprints in [DEPLOY.md](DEPLOY.md)).
 
 ## Documents
 
@@ -18,19 +20,21 @@ Wi-Fi quality, latency, download speed, VPN and browser versions. Nothing is mod
 | Linux and macOS | `simple-check.sh` | `bash simple-check.sh` |
 
 All three are **read-only** and produce the **same report**: identical sections, labels and order
-(COMPUTER, TOP 5 PROGRAMS BY MEMORY, WI-FI, PING, DOWNLOAD SPEED, VPN, BROWSERS), so results from any OS compare directly.
+(version line, COMPUTER, TOP 5 PROGRAMS BY MEMORY, WI-FI, PING, DOWNLOAD SPEED, VPN, BROWSERS), so results from any OS compare directly.
 The `.cmd` fallback (used only when PowerShell is blocked) keeps the headings but gives raw tool output.
 
 Read-only means: no admin rights, no settings, registry, service or software changes. The only file written is the report
 (the current folder, or the home folder if that is not writable). The speed test downloads ~25 MB into memory and discards it.
 
-A report is saved in the current folder as `system-report-<PC>-<date>.txt`. Ask the user to send it back.
+**Consent step:** before reading anything, each script shows what it will and will not do and waits
+for Enter (Ctrl+C or closing the window cancels with nothing read or written). The `.cmd` fallback does the same.
+
+A report is saved in the current folder as `system-report-<PC>-<date>.txt`. The user reviews it and
+sends it back if they are happy with the contents.
 
 ## What it generates
 
-One plain-text file, also printed to the screen:
-
-The report is saved **in the folder the script is run from** (the current folder), on every OS:
+One plain-text file, also printed to the screen. The report is saved **in the folder the script is run from** (the current folder), on every OS:
 
 | How it is run | Report location |
 |---|---|
@@ -124,7 +128,7 @@ Every line of the report is explained in [DEPLOY.md, section 7](DEPLOY.md#what-e
 | Memory | Low free RAM, or "Memory Compression" in the top programs list using many GB |
 | Top 5 programs | Browsers/IDEs holding many GB (too many tabs/extensions) |
 | Last restart | Weeks of uptime (pending updates, leaks) |
-| Disk C: | Under ~10% free |
+| Disk | Under ~10% free |
 | Wi-Fi / Ping / Download | Weak signal, loss, ping spikes, low Mbps |
 | VPN | Connected VPN can add latency and cut throughput |
 | Browsers | Outdated versions |
