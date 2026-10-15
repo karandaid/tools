@@ -69,7 +69,7 @@ with the values below before running it.
 
 ## How your IT team can verify it
 
-1. **Read the code.** It is short (about 85 to 125 lines) and plain text. This exact version:
+1. **Read the code.** It is short (about 45 to 130 lines) and plain text. This exact version:
    - Windows: https://github.com/karandaid/tools/blob/4794caa342d092aa71d197a63b2d7d7cc6da81af/slow-system-check/simple-check.ps1
    - Mac/Linux: https://github.com/karandaid/tools/blob/4794caa342d092aa71d197a63b2d7d7cc6da81af/slow-system-check/simple-check.sh
    - Windows launcher: https://github.com/karandaid/tools/blob/4794caa342d092aa71d197a63b2d7d7cc6da81af/slow-system-check/simple-check.cmd

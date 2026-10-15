@@ -255,7 +255,7 @@ This is practical guidance, not legal advice. For anything contractual, have a l
 2. **They run it, not you.** No remote desktop, no credentials, no admin access. Then you never
    touched their systems.
 3. **Send the pinned commit and hashes** (sections 2 to 4) in the same email. This proves what code
-   was given and lets their IT audit it. Each script is about 40 to 110 lines of readable text.
+   was given and lets their IT audit it. Each script is about 45 to 130 lines of readable text.
 4. **Offer an audit path.** Their IT can read the script, or run it in a throwaway VM, or watch outbound
    traffic. They will see only the ping and the Cloudflare speed-test download.
 5. **Receive only the report.** Accept the single `.txt` file. Do not accept screenshots of their
