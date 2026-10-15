@@ -109,6 +109,8 @@ echo "653848bbe80efcb154c053c671478036e050ee26a1be1a291bb62d6ba175417e  /tmp/sim
 
 ## Reading the report
 
+Every line of the report is explained in [DEPLOY.md, section 7](DEPLOY.md#what-each-line-means). Quick red flags:
+
 | Section | Red flag |
 |---|---|
 | Memory | Low free RAM, or "Memory Compression" in the top programs list using many GB |

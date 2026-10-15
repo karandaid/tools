@@ -162,6 +162,74 @@ brave                           13278 MB
 
 The full sample is in `README.md`.
 
+### What each line means
+
+Each value below says what it is, where the script reads it on each OS, and how to judge it. The
+thresholds are rules of thumb, not hard limits.
+
+**COMPUTER**
+
+| Line | Meaning | Read from (Windows / macOS / Linux) | What to look for |
+|---|---|---|---|
+| Model | Maker and model of the machine | `Win32_ComputerSystem` / `sysctl hw.model` / `/sys/devices/virtual/dmi/id` | Lets you look up the hardware's specs and age. Shows `unknown` in some VMs |
+| OS | Operating system name and build number (on Linux, the kernel version) | `Win32_OperatingSystem` / `sw_vers` / `/etc/os-release`, `uname -r` | Out-of-support or very old builds |
+| CPU | Processor name and number of threads (logical cores) | `Win32_Processor` / `sysctl machdep.cpu` / `/proc/cpuinfo`, `nproc` | A low-end or old CPU for the workload |
+| Memory | Total RAM, and RAM still available for programs | `Win32_OperatingSystem` / `vm_stat` (free + inactive + speculative) / `MemAvailable` in `/proc/meminfo` | Under about 15% free means memory pressure: the PC slows as it compresses memory and swaps to disk |
+| Disk | Free and total space on the system drive (`C:` on Windows, `/` on macOS and Linux) | `Win32_LogicalDisk` / `df` / `df` | Under about 10% free slows updates, swapping and temporary files |
+| Last restart | When the machine last booted | `LastBootUpTime` / `kern.boottime` / `uptime -s` | More than about a week: restart first. On Windows, "Shut down" with Fast Startup does not reset this; only "Restart" does |
+
+**TOP 5 PROGRAMS BY MEMORY**
+
+The five programs using the most RAM right now, in MB. All processes with the same name are added
+together, so one line covers every tab and helper of a browser. Read from: Windows `Get-Process`
+(working set), macOS and Linux `ps` (resident memory). Only program names and memory figures are read,
+not window titles, command lines or what the program has open.
+
+- **Memory Compression** (Windows only) is RAM that Windows has compressed to make room. Several GB
+  here means the PC is short of memory.
+- Browsers (brave, msedge, chrome, firefox) using many GB usually means too many tabs or extensions.
+- Because shared memory is counted once per process, totals for multi-process apps can read slightly high.
+
+**WI-FI**
+
+| Line | Meaning | What to look for |
+|---|---|---|
+| SSID | Name of the connected Wi-Fi network | Confirms which network was tested. Recent macOS versions may show `<redacted>` without Location permission |
+| Signal | Signal strength, 0 to 100% (on macOS, converted from dBm) | Under about 60% means weak signal: move closer or use cable |
+| Rate (Mbps) | Link speed between the device and the router, not the internet speed (Windows: receive rate) | Far below the plan's speed points to the Wi-Fi, not the internet |
+
+Shows `Not on Wi-Fi (wired or none)` on cable. Read from: Windows `netsh wlan show interfaces`, macOS
+`airport` or `system_profiler`, Linux `nmcli`.
+
+**PING 8.8.8.8 (10 tries)**
+
+Ten pings to Google's public DNS server. `Packets` shows how many were sent and received and the
+percentage lost; `Min/Avg/Max` is the round-trip time in milliseconds.
+
+- Any loss, or a large gap between Min and Max, points to an unstable connection.
+- Average under about 30 ms is good, 30 to 100 ms is acceptable, over 100 ms feels slow. VPNs add latency.
+- Some company networks block ping; then 100% loss does not mean the internet is down.
+
+**DOWNLOAD SPEED**
+
+Time to download a 25 MB test file from `speed.cloudflare.com`, in megabits per second. The data is
+discarded, not saved. It is a single download, so it can read lower than a full speed test. Compare it
+with the internet plan, and with the VPN off if one is connected.
+
+**VPN**
+
+`VPN is CONNECTED:` followed by the adapter names, or `No VPN detected`. Read from: Windows network
+adapters that are up and look like a VPN (TAP, TUN, WireGuard, Cisco, Fortinet, Palo Alto and similar),
+macOS connected VPN services (`scutil --nc list`), Linux `tun`, `tap`, `wg`, `ppp`, `tailscale` and
+`nordlynx` interfaces. A VPN routes all traffic through another server, which often lowers speed and
+raises ping. Some third-party VPN apps on macOS are not listed by `scutil`.
+
+**BROWSERS**
+
+Installed version of Edge, Firefox, Chrome and Brave, or `not installed`. Read from the program file's
+version (Windows), the app's `Info.plist` (macOS) or `--version` (Linux). Nothing inside the browser is
+read: no history, tabs, passwords or extensions. Outdated versions can be slower and are a security risk.
+
 ## 8. Protecting yourself against a false data-theft claim
 
 This is practical guidance, not legal advice. For anything contractual, have a lawyer review it.
