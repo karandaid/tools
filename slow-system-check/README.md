@@ -101,11 +101,14 @@ They download only the script, verify its SHA-256, then run it. Quick copy:
 Windows (PowerShell):
 
 ```powershell
-$sha = '4794caa342d092aa71d197a63b2d7d7cc6da81af'
-$d   = Join-Path $env:TEMP 'slow-check'; New-Item -ItemType Directory -Force $d | Out-Null
-$f   = Join-Path $d 'simple-check.ps1'
-Invoke-WebRequest "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.ps1" -OutFile $f
-if ((Get-FileHash $f -Algorithm SHA256).Hash -ne 'B8089D1AEE7A3232E8D9906020D851AC0D41982698B94D29F04921AD6820F771') { throw 'Hash mismatch - do not run' }
+$sha  = '4794caa342d092aa71d197a63b2d7d7cc6da81af'
+$hash = 'B8089D1AEE7A3232E8D9906020D851AC0D41982698B94D29F04921AD6820F771'
+$base = 'https://raw.githubusercontent.com/karandaid/tools'
+$d    = Join-Path $env:TEMP 'slow-check'
+$f    = Join-Path $d 'simple-check.ps1'
+New-Item -ItemType Directory -Force $d | Out-Null
+Invoke-WebRequest "$base/$sha/slow-system-check/simple-check.ps1" -OutFile $f
+if ((Get-FileHash $f).Hash -ne $hash) { throw 'Hash mismatch - do not run' }
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f
 ```
 
@@ -113,8 +116,11 @@ macOS / Linux:
 
 ```bash
 sha=4794caa342d092aa71d197a63b2d7d7cc6da81af
-curl -fsSL "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.sh" -o /tmp/simple-check.sh
-echo "c914be9768f34a62ed683a5de4e54bc27bb81d7ed7d3e45dc28b4f62c131253a  /tmp/simple-check.sh" | shasum -a 256 -c - && bash /tmp/simple-check.sh
+sum=c914be9768f34a62ed683a5de4e54bc27bb81d7ed7d3e45dc28b4f62c131253a
+base=https://raw.githubusercontent.com/karandaid/tools
+curl -fsSL "$base/$sha/slow-system-check/simple-check.sh" -o /tmp/simple-check.sh
+echo "$sum  /tmp/simple-check.sh" | shasum -a 256 -c - &&
+  bash /tmp/simple-check.sh
 ```
 
 (On Linux without `shasum`, use `sha256sum -c -`.)

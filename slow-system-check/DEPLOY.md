@@ -51,9 +51,9 @@ author automatically.** The client reads the report and chooses to send the file
 SHA-256 of each file at that commit:
 
 ```
-b8089d1aee7a3232e8d9906020d851ac0d41982698b94d29f04921ad6820f771  simple-check.ps1   (Windows, PowerShell)
-e7de37fe80a4dc239d23ba983aee296330e0661842b66962422f21c10d0733e1  simple-check.cmd   (Windows launcher)
-c914be9768f34a62ed683a5de4e54bc27bb81d7ed7d3e45dc28b4f62c131253a  simple-check.sh    (Linux / macOS)
+b8089d1aee7a3232e8d9906020d851ac0d41982698b94d29f04921ad6820f771  simple-check.ps1
+e7de37fe80a4dc239d23ba983aee296330e0661842b66962422f21c10d0733e1  simple-check.cmd
+c914be9768f34a62ed683a5de4e54bc27bb81d7ed7d3e45dc28b4f62c131253a  simple-check.sh
 ```
 
 If a hash does not match, do not run the file. Always use the full 40-character commit, never a
@@ -66,11 +66,14 @@ checks its hash, then runs it. The report is saved in the folder PowerShell is o
 somewhere specific, run `cd <folder>` first, e.g. `cd $HOME\Desktop`.
 
 ```powershell
-$sha = '4794caa342d092aa71d197a63b2d7d7cc6da81af'
-$d   = Join-Path $env:TEMP 'slow-check'; New-Item -ItemType Directory -Force $d | Out-Null
-$f   = Join-Path $d 'simple-check.ps1'
-Invoke-WebRequest "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.ps1" -OutFile $f
-if ((Get-FileHash $f -Algorithm SHA256).Hash -ne 'B8089D1AEE7A3232E8D9906020D851AC0D41982698B94D29F04921AD6820F771') { throw 'Hash mismatch - do not run' }
+$sha  = '4794caa342d092aa71d197a63b2d7d7cc6da81af'
+$hash = 'B8089D1AEE7A3232E8D9906020D851AC0D41982698B94D29F04921AD6820F771'
+$base = 'https://raw.githubusercontent.com/karandaid/tools'
+$d    = Join-Path $env:TEMP 'slow-check'
+$f    = Join-Path $d 'simple-check.ps1'
+New-Item -ItemType Directory -Force $d | Out-Null
+Invoke-WebRequest "$base/$sha/slow-system-check/simple-check.ps1" -OutFile $f
+if ((Get-FileHash $f).Hash -ne $hash) { throw 'Hash mismatch - do not run' }
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f
 ```
 
@@ -94,9 +97,11 @@ first to change that.
 
 ```bash
 sha=4794caa342d092aa71d197a63b2d7d7cc6da81af
-curl -fsSL "https://raw.githubusercontent.com/karandaid/tools/$sha/slow-system-check/simple-check.sh" -o /tmp/simple-check.sh
-echo "c914be9768f34a62ed683a5de4e54bc27bb81d7ed7d3e45dc28b4f62c131253a  /tmp/simple-check.sh" | shasum -a 256 -c - || exit 1
-bash /tmp/simple-check.sh
+sum=c914be9768f34a62ed683a5de4e54bc27bb81d7ed7d3e45dc28b4f62c131253a
+base=https://raw.githubusercontent.com/karandaid/tools
+curl -fsSL "$base/$sha/slow-system-check/simple-check.sh" -o /tmp/simple-check.sh
+echo "$sum  /tmp/simple-check.sh" | shasum -a 256 -c - &&
+  bash /tmp/simple-check.sh
 ```
 
 (On Linux `sha256sum -c -` replaces `shasum -a 256 -c -`.)
@@ -116,10 +121,12 @@ git rev-parse HEAD     # must print 4794caa342d092aa71d197a63b2d7d7cc6da81af
 Then run from the folder where you want the report:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\slow-system-check\simple-check.ps1   # Windows
+# Windows
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\slow-system-check\simple-check.ps1
 ```
 ```bash
-bash slow-system-check/simple-check.sh                                                     # Linux / macOS
+# Linux / macOS
+bash slow-system-check/simple-check.sh
 ```
 
 Verified: this downloads about 210 KB and produces the same file hashes as listed above.
